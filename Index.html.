@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futebol de Tampinha</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background-color: green;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Futebol de Tampinha</h1>
+    <p>Use as setas para mover e espaço para chutar!</p>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const tampinha = { x: 100, y: 200, radius: 20, speed: 5 };
+        const bola = { x: 300, y: 200, radius: 10, dx: 2, dy: 2 };
+        let rightPressed = false, leftPressed = false, upPressed = false, downPressed = false, kick = false;
+
+        document.addEventListener("keydown", keyDownHandler);
+        document.addEventListener("keyup", keyUpHandler);
+
+        function keyDownHandler(e) {
+            if (e.key === "ArrowRight") rightPressed = true;
+            if (e.key === "ArrowLeft") leftPressed = true;
+            if (e.key === "ArrowUp") upPressed = true;
+            if (e.key === "ArrowDown") downPressed = true;
+            if (e.key === " ") kick = true;
+        }
+
+        function keyUpHandler(e) {
+            if (e.key === "ArrowRight") rightPressed = false;
+            if (e.key === "ArrowLeft") leftPressed = false;
+            if (e.key === "ArrowUp") upPressed = false;
+            if (e.key === "ArrowDown") downPressed = false;
+            if (e.key === " ") kick = false;
+        }
+
+        function update() {
+            if (rightPressed) tampinha.x += tampinha.speed;
+            if (leftPressed) tampinha.x -= tampinha.speed;
+            if (upPressed) tampinha.y -= tampinha.speed;
+            if (downPressed) tampinha.y += tampinha.speed;
+
+            if (kick && Math.hypot(bola.x - tampinha.x, bola.y - tampinha.y) < 30) {
+                bola.dx = (bola.x - tampinha.x) * 0.2;
+                bola.dy = (bola.y - tampinha.y) * 0.2;
+            }
+
+            bola.x += bola.dx;
+            bola.y += bola.dy;
+            
+            // Rebote da bola nas paredes
+            if (bola.x + bola.radius > canvas.width || bola.x - bola.radius < 0) bola.dx *= -1;
+            if (bola.y + bola.radius > canvas.height || bola.y - bola.radius < 0) bola.dy *= -1;
+
+            bola.dx *= 0.98; // Atrito
+            bola.dy *= 0.98;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Desenha a tampinha
+            ctx.beginPath();
+            ctx.arc(tampinha.x, tampinha.y, tampinha.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "blue";
+            ctx.fill();
+            ctx.closePath();
+
+            // Desenha a bola
+            ctx.beginPath();
+            ctx.arc(bola.x, bola.y, bola.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "white";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
